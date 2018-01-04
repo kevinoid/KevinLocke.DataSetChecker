@@ -140,13 +140,13 @@ namespace KevinLocke.DataSetChecker
                 switch (childNode.LocalName)
                 {
                     case "CommandText":
-                        if (commandText == null)
+                        if (commandText != null)
                         {
                             this.LogError("DbCommand with multiple CommandText", dbCommand);
                             return;
                         }
 
-                        if (childNode.ChildNodes.Count == 1)
+                        if (childNode.ChildNodes.Count != 1)
                         {
                             this.LogError(
                                 Invariant($"Invalid CommandText with {childNode.ChildNodes.Count} child nodes."),
