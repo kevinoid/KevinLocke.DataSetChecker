@@ -87,6 +87,7 @@ namespace KevinLocke.DataSetChecker
                 }
             }
 
+            // TODO: Set appropriate error code based on reported errors
             return 0;
         }
 
