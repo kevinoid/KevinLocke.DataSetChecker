@@ -25,7 +25,9 @@ namespace KevinLocke.DataSetChecker
     /// </summary>
     public class DataSetChecker
     {
-        private static readonly XmlNamespaceManager MsDsNsManager;
+        private static readonly XmlNamespaceManager MsDsNsManager =
+            CreateNamespaceManager();
+
         private static readonly Dictionary<SqlDbType, object> ParameterDefaultValues = new Dictionary<SqlDbType, object>
         {
             { SqlDbType.BigInt, 0L },
@@ -65,12 +67,6 @@ namespace KevinLocke.DataSetChecker
         };
 
         private readonly SqlConnection sqlConnection;
-
-        static DataSetChecker()
-        {
-            MsDsNsManager = new XmlNamespaceManager(new NameTable());
-            MsDsNsManager.AddNamespace("msds", DataSetConstants.MsDsNamespace);
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataSetChecker"/> class.
@@ -325,6 +321,13 @@ namespace KevinLocke.DataSetChecker
         private static void Checker_DataSetCheckerEventHandler(object sender, DataSetCheckerEventArgs eventArgs)
         {
             Console.Error.WriteLine(eventArgs);
+        }
+
+        private static XmlNamespaceManager CreateNamespaceManager()
+        {
+            XmlNamespaceManager msDsNsManager = new XmlNamespaceManager(new NameTable());
+            msDsNsManager.AddNamespace("msds", DataSetConstants.MsDsNamespace);
+            return msDsNsManager;
         }
 
         private void LogError(string message, XmlNode node, Exception exception = null)
