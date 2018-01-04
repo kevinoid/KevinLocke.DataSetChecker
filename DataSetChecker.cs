@@ -226,20 +226,38 @@ namespace KevinLocke.DataSetChecker
                 this.LogError("DbCommand missing CommandText", dbCommand);
                 return;
             }
-        }
 
-        protected void CheckSql(string sql, SqlParameter[] sqlParameters)
-        {
-            using (SqlCommand sqlCommand = new SqlCommand(sql, this.sqlConnection))
+            XmlAttribute commandTypeAttr = dbCommand.Attributes["CommandType"];
+            if (commandTypeAttr == null)
             {
-                sqlCommand.Parameters.AddRange(sqlParameters);
-                using (SqlDataReader sqlDataReader = sqlCommand.ExecuteReader())
-                {
-                    Debug.Assert(!sqlDataReader.HasRows, "FMTONLY queries shouldn't have rows");
-                    Debug.Assert(sqlDataReader.RecordsAffected == 0, "FMTONLY queries shouldn't affect records");
+                this.LogError("DbCommand missing CommandType attribute", dbCommand);
+                return;
+            }
 
-                    // TODO: Check column names/types
+            if (!Enum.TryParse(commandTypeAttr.Value, out CommandType commandType))
+            {
+                this.LogError("Unrecognized CommandType " + commandTypeAttr.Value, dbCommand);
+                return;
+            }
+
+            try
+            {
+                using (SqlCommand sqlCommand = new SqlCommand(commandText, this.sqlConnection))
+                {
+                    sqlCommand.CommandType = commandType;
+                    sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
+                    using (SqlDataReader sqlDataReader = sqlCommand.ExecuteReader())
+                    {
+                        Debug.Assert(!sqlDataReader.HasRows, "FMTONLY queries shouldn't have rows");
+                        Debug.Assert(sqlDataReader.RecordsAffected <= 0, "FMTONLY queries shouldn't affect records");
+
+                        // TODO: Check column names/types
+                    }
                 }
+            }
+            catch (SqlException ex)
+            {
+                this.LogError("Unable to execute query", dbCommand, ex);
             }
         }
 
