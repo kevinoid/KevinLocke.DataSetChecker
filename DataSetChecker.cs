@@ -24,7 +24,6 @@ namespace KevinLocke.DataSetChecker
     /// </summary>
     public class DataSetChecker
     {
-        private const string MsDsNamespace = "urn:schemas-microsoft-com:xml-msdatasource";
         private static readonly XmlNamespaceManager MsDsNsManager;
 
         private readonly SqlConnection sqlConnection;
@@ -32,7 +31,7 @@ namespace KevinLocke.DataSetChecker
         static DataSetChecker()
         {
             MsDsNsManager = new XmlNamespaceManager(new NameTable());
-            MsDsNsManager.AddNamespace("msds", MsDsNamespace);
+            MsDsNsManager.AddNamespace("msds", DataSetConstants.MsDsNamespace);
         }
 
         /// <summary>
@@ -134,7 +133,7 @@ namespace KevinLocke.DataSetChecker
             List<SqlParameter> sqlParameters = null;
             foreach (XmlNode childNode in dbCommand.ChildNodes)
             {
-                if (childNode.NamespaceURI != MsDsNamespace)
+                if (childNode.NamespaceURI != DataSetConstants.MsDsNamespace)
                 {
                     continue;
                 }
@@ -173,7 +172,7 @@ namespace KevinLocke.DataSetChecker
                         sqlParameters = new List<SqlParameter>();
                         foreach (XmlNode parameterNode in childNode.ChildNodes)
                         {
-                            if (parameterNode.NamespaceURI == MsDsNamespace && parameterNode.LocalName == "Parameter")
+                            if (parameterNode.NamespaceURI == DataSetConstants.MsDsNamespace && parameterNode.LocalName == "Parameter")
                             {
                                 SqlParameter sqlParameter = this.ConvertParameter(parameterNode);
                                 sqlParameters.Add(sqlParameter);
