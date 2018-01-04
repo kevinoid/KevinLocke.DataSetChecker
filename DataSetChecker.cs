@@ -72,6 +72,7 @@ namespace KevinLocke.DataSetChecker
                 sqlConnection.Open();
 
                 DataSetChecker checker = new DataSetChecker(sqlConnection);
+                checker.DataSetCheckerEventHandler += Checker_DataSetCheckerEventHandler;
 
                 bool first = true;
                 foreach (string xsdPath in args)
@@ -245,14 +246,25 @@ namespace KevinLocke.DataSetChecker
             return sqlParameter;
         }
 
-        protected void LogError(string message, XmlNode node, Exception exception = null)
+        protected virtual void OnDataSetCheckerEventHandler(DataSetCheckerEventArgs eventArgs)
         {
-            DataSetCheckerEventArgs args = new DataSetCheckerEventArgs(
+            this.DataSetCheckerEventHandler?.Invoke(this, eventArgs);
+        }
+
+        private static void Checker_DataSetCheckerEventHandler(object sender, DataSetCheckerEventArgs eventArgs)
+        {
+            Console.Error.WriteLine(eventArgs);
+        }
+
+        private void LogError(string message, XmlNode node, Exception exception = null)
+        {
+            // FIXME: Throw if no EventHandler?
+            DataSetCheckerEventArgs eventArgs = new DataSetCheckerEventArgs(
                 XmlSeverityType.Error,
                 message,
                 node,
                 exception);
-            this.DataSetCheckerEventHandler(this, args);
+            this.OnDataSetCheckerEventHandler(eventArgs);
         }
     }
 }
