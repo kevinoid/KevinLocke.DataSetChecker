@@ -97,16 +97,13 @@ namespace KevinLocke.DataSetChecker
             Justification = "Passthrough to XMLReader.Create")]
         public void Check(string xsdUri)
         {
+            XmlDocument xsdDocument;
             using (XmlReader xsdReader = XmlReader.Create(xsdUri))
             {
-                this.Check(xsdReader);
+                xsdDocument = new XmlDocument();
+                xsdDocument.Load(xsdReader);
             }
-        }
 
-        public void Check(XmlReader xsdReader)
-        {
-            XmlDocument xsdDocument = new XmlDocument();
-            xsdDocument.Load(xsdReader);
             this.Check(xsdDocument);
         }
 
