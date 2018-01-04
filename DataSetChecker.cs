@@ -26,6 +26,12 @@ namespace KevinLocke.DataSetChecker
     {
         private static readonly XmlNamespaceManager MsDsNsManager;
 
+        private static readonly Dictionary<string, string> ParameterPropToAttr = new Dictionary<string, string>
+        {
+            { "IsNullable", "AllowDbNull" },
+            { "ProviderType", "SqlDbType" }
+        };
+
         private readonly SqlConnection sqlConnection;
 
         static DataSetChecker()
@@ -215,12 +221,13 @@ namespace KevinLocke.DataSetChecker
             foreach (PropertyInfo propertyInfo in typeof(SqlParameter).GetProperties())
             {
                 string propName = propertyInfo.Name;
-                if (propName == "SqlDbType")
+
+                if (!ParameterPropToAttr.TryGetValue(propName, out string attrName))
                 {
-                    propName = "ProviderType";
+                    attrName = propName;
                 }
 
-                XmlAttribute xmlAttribute = parameterNode.Attributes[propName];
+                XmlAttribute xmlAttribute = parameterNode.Attributes[attrName];
                 if (xmlAttribute == null)
                 {
                     continue;
