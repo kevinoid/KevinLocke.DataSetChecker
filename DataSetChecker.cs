@@ -11,6 +11,7 @@ namespace KevinLocke.DataSetChecker
     using System.ComponentModel;
     using System.Data;
     using System.Data.SqlClient;
+    using System.Data.SqlTypes;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Reflection;
@@ -25,6 +26,37 @@ namespace KevinLocke.DataSetChecker
     public class DataSetChecker
     {
         private static readonly XmlNamespaceManager MsDsNsManager;
+        private static readonly Dictionary<SqlDbType, object> ParameterDefaultValues = new Dictionary<SqlDbType, object>
+        {
+            { SqlDbType.BigInt, 0L },
+            { SqlDbType.Binary, new byte[0] },
+            { SqlDbType.Bit, false },
+            { SqlDbType.Char, " " },
+            { SqlDbType.Date, new DateTime(1900, 1, 1) },
+            { SqlDbType.DateTime, new DateTime(1900, 1, 1) },
+            { SqlDbType.DateTime2, new DateTime(1900, 1, 1) },
+            { SqlDbType.DateTimeOffset, new DateTimeOffset(new DateTime(1900, 1, 1)) },
+            { SqlDbType.Decimal, 0m },
+            { SqlDbType.Float, 0d },
+            { SqlDbType.Image, new byte[0] },
+            { SqlDbType.Int, 0 },
+            { SqlDbType.Money, 0m },
+            { SqlDbType.NChar, string.Empty },
+            { SqlDbType.NText, string.Empty },
+            { SqlDbType.NVarChar, string.Empty },
+            { SqlDbType.Real, 0f },
+            { SqlDbType.SmallDateTime, new DateTime(1900, 1, 1) },
+            { SqlDbType.SmallInt, (short)0 },
+            { SqlDbType.SmallMoney, 0m },
+            { SqlDbType.Text, string.Empty },
+            { SqlDbType.Time, default(TimeSpan) },
+            { SqlDbType.Timestamp, new byte[0] },
+            { SqlDbType.TinyInt, (byte)0 },
+            { SqlDbType.UniqueIdentifier, default(Guid) },
+            { SqlDbType.VarBinary, new byte[0] },
+            { SqlDbType.VarChar, string.Empty },
+            { SqlDbType.Xml, new SqlXml() },
+        };
 
         private static readonly Dictionary<string, string> ParameterPropToAttr = new Dictionary<string, string>
         {
@@ -180,6 +212,7 @@ namespace KevinLocke.DataSetChecker
                             if (parameterNode.NamespaceURI == DataSetConstants.MsDsNamespace && parameterNode.LocalName == "Parameter")
                             {
                                 SqlParameter sqlParameter = this.ConvertParameter(parameterNode);
+                                sqlParameter.Value = this.GetParameterValue(sqlParameter);
                                 sqlParameters.Add(sqlParameter);
                             }
                         }
@@ -249,6 +282,21 @@ namespace KevinLocke.DataSetChecker
             }
 
             return sqlParameter;
+        }
+
+        protected virtual object GetParameterValue(SqlParameter sqlParameter)
+        {
+            if (sqlParameter == null)
+            {
+                throw new ArgumentNullException(nameof(sqlParameter));
+            }
+
+            if (sqlParameter.IsNullable)
+            {
+                return DBNull.Value;
+            }
+
+            return ParameterDefaultValues[sqlParameter.SqlDbType];
         }
 
         protected virtual void OnDataSetCheckerEventHandler(DataSetCheckerEventArgs eventArgs)
