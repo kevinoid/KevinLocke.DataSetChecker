@@ -115,22 +115,19 @@ namespace KevinLocke.DataSetChecker
                 throw new ArgumentNullException(nameof(xsdDocument));
             }
 
-            foreach (XmlNode tableAdapter in xsdDocument.GetElementsByTagName("TableAdapter", MsDsNamespace))
+            foreach (XmlNode dbCommand in xsdDocument.SelectNodes("//msds:DbCommand", MsDsNsManager))
             {
-                this.CheckTableAdapter(tableAdapter);
-            }
-        }
-
-        protected void CheckTableAdapter(XmlNode tableAdapter)
-        {
-            foreach (XmlNode dbSource in tableAdapter.SelectNodes("//DbCommand", MsDsNsManager))
-            {
-                this.CheckDbCommand(dbSource);
+                this.CheckDbCommand(dbCommand);
             }
         }
 
         protected void CheckDbCommand(XmlNode dbCommand)
         {
+            if (dbCommand == null)
+            {
+                throw new ArgumentNullException(nameof(dbCommand));
+            }
+
             string commandText = null;
             List<SqlParameter> sqlParameters = null;
             foreach (XmlNode childNode in dbCommand.ChildNodes)
