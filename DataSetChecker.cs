@@ -16,6 +16,7 @@ namespace KevinLocke.DataSetChecker
     using System.Diagnostics.CodeAnalysis;
     using System.Reflection;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Xml;
     using System.Xml.Schema;
 
@@ -66,6 +67,23 @@ namespace KevinLocke.DataSetChecker
             { "IsNullable", "AllowDbNull" },
             { "ProviderType", "SqlDbType" }
         };
+
+        /// <summary>
+        /// Regular expression to match a valid SQL Server parameter.
+        /// https://docs.microsoft.com/en-us/sql/relational-databases/databases/database-identifiers
+        /// </summary>
+        /// <remarks>
+        /// Leading @ made optional due to <see cref="SqlParameter"/> adding it
+        /// (or behaving as if it does).
+        /// </remarks>
+        /// <remarks>
+        /// SQL Server actually allows using <c>@</c> as a variable.
+        /// (Tested on Microsoft SQL Server 12.0.5207.0)
+        /// <see cref="SqlParameter.ParameterName"/> supports <c>"@"</c>, not
+        /// <c>""</c>.
+        /// </remarks>
+        private static readonly Regex SqlServerParameterNameRegex =
+            new Regex(@"^[\p{L}\p{Nd}@#$_]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         private readonly bool hasSPDescribe;
         private readonly SqlConnection sqlConnection;
@@ -335,7 +353,7 @@ namespace KevinLocke.DataSetChecker
             string commandText,
             IEnumerable<SqlParameter> sqlParameters)
         {
-            string paramsDecl = GetSqlDeclaration(sqlParameters);
+            string paramsDecl = this.GetSqlDeclaration(sqlParameters);
             using (SqlCommand sqlCommand = new SqlCommand("sp_describe_first_result_set", this.sqlConnection))
             {
                 sqlCommand.CommandType = CommandType.StoredProcedure;
@@ -428,7 +446,8 @@ namespace KevinLocke.DataSetChecker
             return msDsNsManager;
         }
 
-        private static string GetSqlDeclaration(IEnumerable<SqlParameter> parameters)
+        // FIXME: Is this really not implemented somewhere in ADO.NET?
+        private string GetSqlDeclaration(IEnumerable<SqlParameter> parameters)
         {
             if (parameters == null)
             {
@@ -438,7 +457,23 @@ namespace KevinLocke.DataSetChecker
             StringBuilder declaration = new StringBuilder();
             foreach (SqlParameter parameter in parameters)
             {
-                declaration.Append(parameter.ParameterName)
+                string parameterName = parameter.ParameterName;
+                if (!SqlServerParameterNameRegex.IsMatch(parameterName))
+                {
+                    // SqlCommand appears to ignore these.
+                    this.LogWarning(
+                        Invariant($"Ignoring Parameter with invalid ParameterName [{parameterName}]"),
+                        null);
+                    continue;
+                }
+
+                if (parameterName.Length == 0 || parameterName[0] != '@')
+                {
+                    // SqlCommand behaves as if @ prefix is added when not present.
+                    declaration.Append('@');
+                }
+
+                declaration.Append(parameterName)
                     .Append(' ')
                     .Append(parameter.SqlDbType)
                     .Append(", ");
