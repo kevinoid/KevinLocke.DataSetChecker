@@ -269,7 +269,20 @@ namespace KevinLocke.DataSetChecker
             }
             catch (SqlException ex)
             {
-                this.LogError("Unable to execute query", dbCommand, ex);
+                switch (ex.Number)
+                {
+                    case 11509:
+                        this.LogWarning("Command can return different result schemas", dbCommand, ex);
+                        break;
+                    case 11513: // dynamic SQL
+                    case 11524: // indirect recursion
+                    case 11525: // temporary tables
+                        this.LogWarning("Unable to check command", dbCommand, ex);
+                        break;
+                    default:
+                        this.LogError("Unable to execute query", dbCommand, ex);
+                        break;
+                }
             }
         }
 
@@ -444,6 +457,17 @@ namespace KevinLocke.DataSetChecker
             // FIXME: Throw if no EventHandler?
             DataSetCheckerEventArgs eventArgs = new DataSetCheckerEventArgs(
                 XmlSeverityType.Error,
+                message,
+                node,
+                exception);
+            this.OnDataSetCheckerEventHandler(eventArgs);
+        }
+
+        private void LogWarning(string message, XmlNode node, Exception exception = null)
+        {
+            // FIXME: Throw if no EventHandler?
+            DataSetCheckerEventArgs eventArgs = new DataSetCheckerEventArgs(
+                XmlSeverityType.Warning,
                 message,
                 node,
                 exception);
