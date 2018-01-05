@@ -15,6 +15,7 @@ namespace KevinLocke.DataSetChecker
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Reflection;
+    using System.Text;
     using System.Xml;
     using System.Xml.Schema;
 
@@ -66,6 +67,7 @@ namespace KevinLocke.DataSetChecker
             { "ProviderType", "SqlDbType" }
         };
 
+        private readonly bool hasSPDescribe;
         private readonly SqlConnection sqlConnection;
 
         /// <summary>
@@ -77,9 +79,34 @@ namespace KevinLocke.DataSetChecker
         {
             this.sqlConnection = sqlConnection ?? throw new ArgumentNullException(nameof(sqlConnection));
 
-            using (SqlCommand sqlCommand = new SqlCommand("SET FMTONLY ON", sqlConnection))
+            try
             {
-                sqlCommand.ExecuteNonQuery();
+                using (SqlCommand sqlCommand = new SqlCommand("sp_describe_first_result_set", sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("tsql", "SELECT 1");
+
+                    using (SqlDataReader sqlDataReader = sqlCommand.ExecuteReader())
+                    {
+                        this.hasSPDescribe = sqlDataReader.HasRows;
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number != 2812)
+                {
+                    // Error was not "Could not find stored procedure"
+                    throw;
+                }
+            }
+
+            if (!this.hasSPDescribe)
+            {
+                using (SqlCommand sqlCommand = new SqlCommand("SET FMTONLY ON", sqlConnection))
+                {
+                    sqlCommand.ExecuteNonQuery();
+                }
             }
         }
 
@@ -238,22 +265,80 @@ namespace KevinLocke.DataSetChecker
 
             try
             {
-                using (SqlCommand sqlCommand = new SqlCommand(commandText, this.sqlConnection))
-                {
-                    sqlCommand.CommandType = commandType;
-                    sqlCommand.Parameters.AddRange(sqlParameters.ToArray());
-                    using (SqlDataReader sqlDataReader = sqlCommand.ExecuteReader())
-                    {
-                        Debug.Assert(!sqlDataReader.HasRows, "FMTONLY queries shouldn't have rows");
-                        Debug.Assert(sqlDataReader.RecordsAffected <= 0, "FMTONLY queries shouldn't affect records");
-
-                        // TODO: Check column names/types
-                    }
-                }
+                this.CheckCommand(commandText, commandType, sqlParameters);
             }
             catch (SqlException ex)
             {
                 this.LogError("Unable to execute query", dbCommand, ex);
+            }
+        }
+
+        protected void CheckCommand(
+            string commandText,
+            CommandType commandType,
+            ICollection<SqlParameter> sqlParameters)
+        {
+            if (this.hasSPDescribe)
+            {
+                this.CheckCommandSPDescribe(commandText, sqlParameters);
+            }
+            else
+            {
+                SqlParameter[] sqlParametersArray = null;
+                if (sqlParameters != null)
+                {
+                    sqlParametersArray = new SqlParameter[sqlParameters.Count];
+                    sqlParameters.CopyTo(sqlParametersArray, 0);
+                }
+
+                this.CheckCommandFormatOnly(commandText, commandType, sqlParametersArray);
+            }
+        }
+
+        [SuppressMessage(
+            "Microsoft.Security",
+            "CA2100:Review SQL queries for security vulnerabilities",
+            Justification = "CommandText from XML file")]
+        protected void CheckCommandFormatOnly(
+            string commandText,
+            CommandType commandType,
+            SqlParameter[] sqlParameters)
+        {
+            using (SqlCommand sqlCommand = new SqlCommand(commandText, this.sqlConnection))
+            {
+                sqlCommand.CommandType = commandType;
+                sqlCommand.Parameters.AddRange(sqlParameters);
+                using (SqlDataReader sqlDataReader = sqlCommand.ExecuteReader())
+                {
+                    Debug.Assert(!sqlDataReader.HasRows, "FMTONLY queries shouldn't have rows");
+                    Debug.Assert(sqlDataReader.RecordsAffected <= 0, "FMTONLY queries shouldn't affect records");
+
+                    // TODO: Check column names/types
+                }
+            }
+        }
+
+        protected void CheckCommandSPDescribe(
+            string commandText,
+            IEnumerable<SqlParameter> sqlParameters)
+        {
+            string paramsDecl = GetSqlDeclaration(sqlParameters);
+            using (SqlCommand sqlCommand = new SqlCommand("sp_describe_first_result_set", this.sqlConnection))
+            {
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+                sqlCommand.Parameters.Add(new SqlParameter
+                {
+                    ParameterName = "tsql",
+                    Size = -1,
+                    SqlDbType = SqlDbType.NVarChar,
+                    Value = commandText,
+                });
+                sqlCommand.Parameters.AddWithValue("params", paramsDecl);
+
+                using (SqlDataReader sqlDataReader = sqlCommand.ExecuteReader())
+                {
+                    // TODO: Check column names/types
+                }
             }
         }
 
@@ -328,6 +413,30 @@ namespace KevinLocke.DataSetChecker
             XmlNamespaceManager msDsNsManager = new XmlNamespaceManager(new NameTable());
             msDsNsManager.AddNamespace("msds", DataSetConstants.MsDsNamespace);
             return msDsNsManager;
+        }
+
+        private static string GetSqlDeclaration(IEnumerable<SqlParameter> parameters)
+        {
+            if (parameters == null)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder declaration = new StringBuilder();
+            foreach (SqlParameter parameter in parameters)
+            {
+                declaration.Append(parameter.ParameterName)
+                    .Append(' ')
+                    .Append(parameter.SqlDbType)
+                    .Append(", ");
+            }
+
+            if (declaration.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            return declaration.ToString(0, declaration.Length - 2);
         }
 
         private void LogError(string message, XmlNode node, Exception exception = null)
