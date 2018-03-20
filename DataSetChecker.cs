@@ -33,7 +33,7 @@ namespace KevinLocke.DataSetChecker
         private static readonly Dictionary<SqlDbType, object> ParameterDefaultValues = new Dictionary<SqlDbType, object>
         {
             { SqlDbType.BigInt, 0L },
-            { SqlDbType.Binary, new byte[0] },
+            { SqlDbType.Binary, Array.Empty<byte>() },
             { SqlDbType.Bit, false },
             { SqlDbType.Char, " " },
             { SqlDbType.Date, new DateTime(1900, 1, 1) },
@@ -42,7 +42,7 @@ namespace KevinLocke.DataSetChecker
             { SqlDbType.DateTimeOffset, new DateTimeOffset(new DateTime(1900, 1, 1)) },
             { SqlDbType.Decimal, 0m },
             { SqlDbType.Float, 0d },
-            { SqlDbType.Image, new byte[0] },
+            { SqlDbType.Image, Array.Empty<byte>() },
             { SqlDbType.Int, 0 },
             { SqlDbType.Money, 0m },
             { SqlDbType.NChar, string.Empty },
@@ -54,10 +54,10 @@ namespace KevinLocke.DataSetChecker
             { SqlDbType.SmallMoney, 0m },
             { SqlDbType.Text, string.Empty },
             { SqlDbType.Time, default(TimeSpan) },
-            { SqlDbType.Timestamp, new byte[0] },
+            { SqlDbType.Timestamp, Array.Empty<byte>() },
             { SqlDbType.TinyInt, (byte)0 },
             { SqlDbType.UniqueIdentifier, default(Guid) },
-            { SqlDbType.VarBinary, new byte[0] },
+            { SqlDbType.VarBinary, Array.Empty<byte>() },
             { SqlDbType.VarChar, string.Empty },
             { SqlDbType.Xml, new SqlXml() },
         };
