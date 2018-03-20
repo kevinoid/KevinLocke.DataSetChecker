@@ -42,7 +42,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\KevinLocke.DataSetChecker.xml</DocumentationFile>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>AllAnalyzerRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
@@ -56,7 +56,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\KevinLocke.DataSetChecker.xml</DocumentationFile>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>AllAnalyzerRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
@@ -83,6 +83,7 @@
     <Compile Include="XPathFinder.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="AllAnalyzerRules.ruleset" />
     <None Include="packages.config" />
     <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
