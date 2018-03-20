@@ -146,6 +146,7 @@ namespace KevinLocke.DataSetChecker
                 return 1;
             }
 
+            int exitCode = 0;
             using (SqlConnection sqlConnection = new SqlConnection(args[0]))
             {
                 sqlConnection.Open();
@@ -158,16 +159,25 @@ namespace KevinLocke.DataSetChecker
                 {
                     if (first)
                     {
+                        // Skip connection string (first argument)
                         first = false;
                         continue;
                     }
 
-                    checker.Check(xsdPath);
+                    try
+                    {
+                        // TODO: Set exit code based on non-fatal validation errors
+                        checker.Check(xsdPath);
+                    }
+                    catch (XmlException ex)
+                    {
+                        Console.Error.WriteLine("Error checking {0}: {1}", xsdPath, ex);
+                        exitCode = 1;
+                    }
                 }
             }
 
-            // TODO: Set appropriate error code based on reported errors
-            return 0;
+            return exitCode;
         }
 
         [SuppressMessage(
