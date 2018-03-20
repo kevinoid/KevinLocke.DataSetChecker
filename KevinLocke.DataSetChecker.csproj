@@ -83,6 +83,7 @@
     <Compile Include="XPathFinder.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".editorconfig" />
     <None Include="AllAnalyzerRules.ruleset" />
     <None Include="packages.config" />
     <AdditionalFiles Include="stylecop.json" />
