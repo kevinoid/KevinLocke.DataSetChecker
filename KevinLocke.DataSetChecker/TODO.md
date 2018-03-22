@@ -2,6 +2,14 @@
 * Support testing with different `SET` options (e.g. `SET QUOTED_IDENTIFIER`).
 * Set exit code based on presence of errors.
 * Read connection string from XSD if not give on command line.
+* Use `DbConnection` instead of `SqlConnection`
+  https://stackoverflow.com/a/185482/503410
+  - Can get using [`DbProviderFactories`](https://docs.microsoft.com/en-us/dotnet/api/system.data.common.dbproviderfactories)
+    Note: Recent support in .NET Core
+    https://github.com/dotnet/corefx/pull/25410
+    Workaround:
+    https://weblog.west-wind.com/posts/2017/Nov/27/Working-around-the-lack-of-dynamic-DbProviderFactory-loading-in-NET-Core
+* Test with different providers (Access, ODBC, SQL Server, etc.)
 * Choose DbSource name attribute based on command type
 * Add configurable error reporters/formatters.
   * Output in JUnit or other consumable XML format?
