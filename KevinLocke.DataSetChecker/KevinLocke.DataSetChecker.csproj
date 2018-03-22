@@ -81,6 +81,8 @@
   <ItemGroup>
     <Compile Include="DataSetChecker.cs" />
     <Compile Include="DataSetCheckerEventArgs.cs" />
+    <Compile Include="DataSetCheckerOptions.cs" />
+    <Compile Include="DataSetCheckerSettings.cs" />
     <Compile Include="DataSetConstants.cs" />
     <Compile Include="DataSetXPathFinder.cs" />
     <Compile Include="GlobalSuppressions.cs" />

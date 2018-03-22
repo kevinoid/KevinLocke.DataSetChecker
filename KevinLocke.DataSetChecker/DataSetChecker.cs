@@ -19,7 +19,7 @@ namespace KevinLocke.DataSetChecker
     using System.Text.RegularExpressions;
     using System.Xml;
     using System.Xml.Schema;
-
+    using Mono.Options;
     using static System.FormattableString;
 
     /// <summary>
@@ -139,31 +139,41 @@ namespace KevinLocke.DataSetChecker
         /// <returns>0 if the XSD passes all checks.  1 Otherwise.</returns>
         public static int Main(string[] args)
         {
-            if (args == null || args.Length < 2)
+            DataSetCheckerOptions options = new DataSetCheckerOptions();
+            OptionSet optionSet = GetOptionSetFor(options);
+            try
             {
-                Console.Error.WriteLine("Error: Missing required arguments.\n" +
-                    "Usage: DataSetQueryChecker <Connection String> <XSD...>");
+                optionSet.Parse(args);
+            }
+            catch (OptionException ex)
+            {
+                Console.Error.WriteLine("Error parsing options: {0}", ex);
+                return 1;
+            }
+
+            if (options.ShowHelp)
+            {
+                optionSet.WriteOptionDescriptions(Console.Out);
+                return 0;
+            }
+
+            if (options.DataSetFilePaths.Count == 0)
+            {
+                Console.Error.WriteLine("Error: Missing required arguments.");
+                optionSet.WriteOptionDescriptions(Console.Error);
                 return 1;
             }
 
             int exitCode = 0;
-            using (SqlConnection sqlConnection = new SqlConnection(args[0]))
+            using (SqlConnection sqlConnection = new SqlConnection(options.ConnectionString))
             {
                 sqlConnection.Open();
 
                 DataSetChecker checker = new DataSetChecker(sqlConnection);
                 checker.DataSetCheckerEventHandler += Checker_DataSetCheckerEventHandler;
 
-                bool first = true;
-                foreach (string xsdPath in args)
+                foreach (string xsdPath in options.DataSetFilePaths)
                 {
-                    if (first)
-                    {
-                        // Skip connection string (first argument)
-                        first = false;
-                        continue;
-                    }
-
                     try
                     {
                         // TODO: Set exit code based on non-fatal validation errors
@@ -218,6 +228,32 @@ namespace KevinLocke.DataSetChecker
             {
                 this.CheckDbCommand(dbCommand);
             }
+        }
+
+#pragma warning disable CS3002 // Return type is not CLS-compliant
+        internal static OptionSet GetOptionSetFor(DataSetCheckerOptions options)
+#pragma warning restore CS3002 // Return type is not CLS-compliant
+        {
+            return new OptionSet
+            {
+                { "h|help", "show this message and exit", (bool showHelp) => options.ShowHelp = showHelp },
+                {
+                    "<>",
+                    arg =>
+                    {
+                        if (options.ConnectionString == null)
+                        {
+                            // First argument is connection string
+                            options.ConnectionString = arg;
+                        }
+                        else
+                        {
+                            // Subsequent arguments are XSDs
+                            options.DataSetFilePaths.Add(arg);
+                        }
+                    }
+                },
+            };
         }
 
         protected void CheckDbCommand(XmlNode dbCommand)
