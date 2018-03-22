@@ -185,7 +185,13 @@ namespace KevinLocke.DataSetChecker
             int exitCode = 0;
             using (DataSetChecker checker = new DataSetChecker(options.ConnectionString))
             {
-                checker.DataSetCheckerEventHandler += Checker_DataSetCheckerEventHandler;
+                checker.DataSetCheckerEventHandler += (object sender, DataSetCheckerEventArgs eventArgs) =>
+                {
+                    if (eventArgs.Severity == XmlSeverityType.Error || !options.NoWarnings)
+                    {
+                        Console.Error.WriteLine(eventArgs);
+                    }
+                };
 
                 foreach (string xsdPath in options.DataSetFilePaths)
                 {
@@ -252,6 +258,7 @@ namespace KevinLocke.DataSetChecker
             return new OptionSet
             {
                 { "h|help", "show this message and exit", (bool showHelp) => options.ShowHelp = showHelp },
+                { "w", "suppress warning messages", noWarn => options.NoWarnings = noWarn != null },
                 {
                     "<>",
                     arg =>
@@ -504,11 +511,6 @@ namespace KevinLocke.DataSetChecker
         protected virtual void OnDataSetCheckerEventHandler(DataSetCheckerEventArgs eventArgs)
         {
             this.DataSetCheckerEventHandler?.Invoke(this, eventArgs);
-        }
-
-        private static void Checker_DataSetCheckerEventHandler(object sender, DataSetCheckerEventArgs eventArgs)
-        {
-            Console.Error.WriteLine(eventArgs);
         }
 
         private static XmlNamespaceManager CreateNamespaceManager()

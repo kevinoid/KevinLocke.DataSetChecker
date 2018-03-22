@@ -19,5 +19,7 @@ namespace KevinLocke.DataSetChecker
     public class DataSetCheckerSettings
     {
         public string ConnectionString { get; set; }
+
+        public bool NoWarnings { get; set; }
     }
 }
