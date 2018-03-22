@@ -187,10 +187,20 @@ namespace KevinLocke.DataSetChecker
             Justification = "Passthrough to XMLReader.Create")]
         public void Check(string xsdUri)
         {
+            // Disable DTD processing and external references to avoid issues
+            // with untrusted or partially trusted XSD files.
+            // (e.g. XML Bombs and resolver information leaks)
+            // https://docs.microsoft.com/en-us/visualstudio/code-quality/ca3075-insecure-dtd-processing
+            //
+            // If anyone is using these in practice, can add option to allow.
+            XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+            xmlReaderSettings.DtdProcessing = DtdProcessing.Prohibit;
+            xmlReaderSettings.XmlResolver = null;
+
             XmlDocument xsdDocument;
-            using (XmlReader xsdReader = XmlReader.Create(xsdUri))
+            using (XmlReader xsdReader = XmlReader.Create(xsdUri, xmlReaderSettings))
             {
-                xsdDocument = new XmlDocument();
+                xsdDocument = new XmlDocument { XmlResolver = null };
                 xsdDocument.Load(xsdReader);
             }
 
