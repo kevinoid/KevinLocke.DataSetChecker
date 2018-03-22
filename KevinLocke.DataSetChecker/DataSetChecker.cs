@@ -25,7 +25,7 @@ namespace KevinLocke.DataSetChecker
     /// <summary>
     /// Checks the queries in a Typed DataSet XSD for correctness.
     /// </summary>
-    public class DataSetChecker
+    public class DataSetChecker : IDisposable
     {
         private static readonly XmlNamespaceManager MsDsNsManager =
             CreateNamespaceManager();
@@ -85,18 +85,25 @@ namespace KevinLocke.DataSetChecker
         private static readonly Regex SqlServerParameterNameRegex =
             new Regex(@"^[\p{L}\p{Nd}@#$_]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-        private readonly bool hasSPDescribe;
-        private readonly SqlConnection sqlConnection;
+        private readonly SqlConnection sqlConnectionFmtOnly;
+        private readonly SqlConnection sqlConnectionSpDescribe;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataSetChecker"/> class.
         /// </summary>
-        /// <param name="sqlConnection">Connection which will be used for
-        /// checking.</param>
-        public DataSetChecker(SqlConnection sqlConnection)
+        /// <param name="connectionString">Connection string which will be used
+        /// for checking.</param>
+        public DataSetChecker(string connectionString)
         {
-            this.sqlConnection = sqlConnection ?? throw new ArgumentNullException(nameof(sqlConnection));
+            if (connectionString == null)
+            {
+                throw new ArgumentNullException(nameof(connectionString));
+            }
 
+            SqlConnection sqlConnection = new SqlConnection(connectionString);
+            sqlConnection.Open();
+
+            bool hasSpDescribe = false;
             try
             {
                 using (SqlCommand sqlCommand = new SqlCommand("sp_describe_first_result_set", sqlConnection))
@@ -106,7 +113,7 @@ namespace KevinLocke.DataSetChecker
 
                     using (SqlDataReader sqlDataReader = sqlCommand.ExecuteReader())
                     {
-                        this.hasSPDescribe = sqlDataReader.HasRows;
+                        hasSpDescribe = sqlDataReader.HasRows;
                     }
                 }
             }
@@ -119,16 +126,27 @@ namespace KevinLocke.DataSetChecker
                 }
             }
 
-            if (!this.hasSPDescribe)
+            if (hasSpDescribe)
             {
-                using (SqlCommand sqlCommand = new SqlCommand("SET FMTONLY ON", sqlConnection))
-                {
-                    sqlCommand.ExecuteNonQuery();
-                }
+                this.sqlConnectionSpDescribe = new SqlConnection(sqlConnection.ConnectionString);
+                this.sqlConnectionSpDescribe.Open();
+            }
+
+            using (SqlCommand sqlCommand = new SqlCommand("SET FMTONLY ON", sqlConnection))
+            {
+                sqlCommand.ExecuteNonQuery();
+                this.sqlConnectionFmtOnly = sqlConnection;
             }
         }
 
         public event EventHandler<DataSetCheckerEventArgs> DataSetCheckerEventHandler;
+
+
+        public void Dispose()
+        {
+            this.sqlConnectionFmtOnly?.Dispose();
+            this.sqlConnectionSpDescribe?.Dispose();
+        }
 
         /// <summary>
         /// Entry-point to check a named XSD against a given collection.
@@ -165,11 +183,8 @@ namespace KevinLocke.DataSetChecker
             }
 
             int exitCode = 0;
-            using (SqlConnection sqlConnection = new SqlConnection(options.ConnectionString))
+            using (DataSetChecker checker = new DataSetChecker(options.ConnectionString))
             {
-                sqlConnection.Open();
-
-                DataSetChecker checker = new DataSetChecker(sqlConnection);
                 checker.DataSetCheckerEventHandler += Checker_DataSetCheckerEventHandler;
 
                 foreach (string xsdPath in options.DataSetFilePaths)
@@ -365,11 +380,12 @@ namespace KevinLocke.DataSetChecker
             CommandType commandType,
             ICollection<SqlParameter> sqlParameters)
         {
-            if (this.hasSPDescribe)
+            if (this.sqlConnectionSpDescribe != null)
             {
                 this.CheckCommandSPDescribe(commandText, sqlParameters);
             }
-            else
+
+            if (this.sqlConnectionFmtOnly != null)
             {
                 SqlParameter[] sqlParametersArray = null;
                 if (sqlParameters != null)
@@ -391,7 +407,7 @@ namespace KevinLocke.DataSetChecker
             CommandType commandType,
             SqlParameter[] sqlParameters)
         {
-            using (SqlCommand sqlCommand = new SqlCommand(commandText, this.sqlConnection))
+            using (SqlCommand sqlCommand = new SqlCommand(commandText, this.sqlConnectionFmtOnly))
             {
                 sqlCommand.CommandType = commandType;
                 sqlCommand.Parameters.AddRange(sqlParameters);
@@ -410,7 +426,7 @@ namespace KevinLocke.DataSetChecker
             IEnumerable<SqlParameter> sqlParameters)
         {
             string paramsDecl = this.GetSqlDeclaration(sqlParameters);
-            using (SqlCommand sqlCommand = new SqlCommand("sp_describe_first_result_set", this.sqlConnection))
+            using (SqlCommand sqlCommand = new SqlCommand("sp_describe_first_result_set", this.sqlConnectionSpDescribe))
             {
                 sqlCommand.CommandType = CommandType.StoredProcedure;
                 sqlCommand.Parameters.Add(new SqlParameter
