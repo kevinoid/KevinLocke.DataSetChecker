@@ -12,8 +12,11 @@ namespace KevinLocke.DataSetChecker
 
     /// <summary>
     /// Finds an XPath expression for a given <see cref="XmlNode"/>.
-    /// Based on https://stackoverflow.com/a/241291
     /// </summary>
+    /// <remarks>
+    /// Based on <a href="https://stackoverflow.com/a/241291">How to get xpath
+    /// from an XmlNode instance</a>.
+    /// </remarks>
     public class XPathFinder
     {
         private static readonly Dictionary<XmlNodeType, string> NodeTypeTest = new()
