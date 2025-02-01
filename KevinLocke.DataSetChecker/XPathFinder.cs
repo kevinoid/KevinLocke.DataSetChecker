@@ -39,7 +39,7 @@ namespace KevinLocke.DataSetChecker
         /// <param name="context">Node from which the XPath will be run.
         /// If <c>null</c>, an absolute XPath is returned.</param>
         /// <returns>An XPath expression which selects <paramref name="node"/>
-        /// when run from <paramref name="context"/></returns>
+        /// when run from <paramref name="context"/>.</returns>
         public virtual string FindXPath(XmlNode node, XmlNode context)
         {
             if (node == null)
@@ -105,8 +105,9 @@ namespace KevinLocke.DataSetChecker
         /// <see cref="XmlNode"/> selected by type.
         /// </summary>
         /// <param name="node">Node for which to find a predicate.</param>
-        /// <param name="siblingIsMatch">Does a sibling node match the XPath
-        /// expression without the returned predicate?</param>
+        /// <param name="siblingIsMatch">Predicate which returns <c>true</c>
+        /// when a sibling node matches the XPath expression without the
+        /// returned predicate.</param>
         /// <returns>Predicate which uniquely selects the given node
         /// from its parent node by type.  <see cref="string.Empty"/> if the
         /// type alone is unique.</returns>
