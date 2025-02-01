@@ -5,10 +5,6 @@
       "companyName": "Kevin Locke",
       "copyrightText": "Copyright {years} {companyName}.  All rights reserved.",
       "variables": {
-        "email": "kevin@kevinlocke.name",
-        "licenseName": "MIT License",
-        "licenseFile": "LICENSE.txt",
-        "projectName": "KevinLocke.DataSetChecker",
         "years": "2017-2025"
       }
     },

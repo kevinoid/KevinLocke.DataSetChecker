@@ -1,5 +1,5 @@
 // <copyright file="DataSetCheckerSettings.cs" company="Kevin Locke">
-// Copyright 2017-2018 Kevin Locke &lt;kevin@kevinlocke.name&gt;
+// Copyright 2017-2025 Kevin Locke &lt;kevin@kevinlocke.name&gt;
 // This file is part of KevinLocke.DataSetChecker,
 // publicly available under the MIT License.  See LICENSE.txt for details.
 // </copyright>
