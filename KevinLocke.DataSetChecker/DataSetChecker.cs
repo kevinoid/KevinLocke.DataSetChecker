@@ -91,6 +91,7 @@ namespace KevinLocke.DataSetChecker
 
         private readonly SqlConnection sqlConnectionFmtOnly;
         private readonly SqlConnection sqlConnectionSpDescribe;
+        private bool disposedValue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DataSetChecker"/> class.
@@ -137,12 +138,6 @@ namespace KevinLocke.DataSetChecker
         }
 
         public event EventHandler<DataSetCheckerEventArgs> DataSetCheckerEventHandler;
-
-        public void Dispose()
-        {
-            this.sqlConnectionFmtOnly?.Dispose();
-            this.sqlConnectionSpDescribe?.Dispose();
-        }
 
         /// <summary>
         /// Entry-point to check a named XSD against a given collection.
@@ -247,6 +242,13 @@ namespace KevinLocke.DataSetChecker
             {
                 this.CheckDbCommand(dbCommand);
             }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            this.Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
 #pragma warning disable CS3002 // Return type is not CLS-compliant
@@ -506,6 +508,20 @@ namespace KevinLocke.DataSetChecker
         protected virtual void OnDataSetCheckerEventHandler(DataSetCheckerEventArgs eventArgs)
         {
             this.DataSetCheckerEventHandler?.Invoke(this, eventArgs);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposedValue)
+            {
+                if (disposing)
+                {
+                    this.sqlConnectionFmtOnly?.Dispose();
+                    this.sqlConnectionSpDescribe?.Dispose();
+                }
+
+                this.disposedValue = true;
+            }
         }
 
         private static XmlNamespaceManager CreateNamespaceManager()
