@@ -92,8 +92,6 @@ dotnet_code_quality.ERP021.severity = none
 # Suggest "swallows an unobserved exception"
 # This is safe when the cause of a particular exception type is known
 dotnet_code_quality.ERP022.severity = suggestion
-# Ignore "Use explicit type instead of 'var'"
-dotnet_diagnostic.IDE0008.severity = silent
 # Ignore "Use block body for methods"
 dotnet_diagnostic.IDE0022.severity = silent
 # Suggest "'if' statement can be simplified"
