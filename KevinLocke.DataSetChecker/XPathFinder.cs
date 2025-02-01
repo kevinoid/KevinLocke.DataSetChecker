@@ -51,6 +51,7 @@ namespace KevinLocke.DataSetChecker
             while (node != null && node != context)
             {
                 XmlNodeType nodeType = node.NodeType;
+#pragma warning disable IDE0010 // Add missing cases
                 switch (nodeType)
                 {
                     case XmlNodeType.Attribute:
@@ -81,6 +82,7 @@ namespace KevinLocke.DataSetChecker
                         node = node.ParentNode;
                         break;
                 }
+#pragma warning restore IDE0010 // Add missing cases
             }
 
             if (steps.Count == 0)
