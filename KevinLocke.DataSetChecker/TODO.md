@@ -22,6 +22,11 @@
   with bad value due to using default parameter values.
 * Check result schema
 * Warn about parameters with empty `ParameterName` (ignored by `SqlCommand`)?
+* Warn if SQL response schema contains columns not declared in table schema.
+* Warn if SQL response schema lacks columns declared in table schema.
+* Warn if SQL response schema column type doesn't match table schema.
+* Warn if SQL response schema column nullability doesn't match table schema.
+* Warn if SQL response schema column max length doesn't match table schema.
 * Pass `XmlNode` to `GetSqlDeclaration` for logging.
 * Check for unused parameters (parameters not present in SQL)
 * Make file reading and SQL calls asynchronous.
@@ -29,5 +34,14 @@
   connection string.
 * Enable [MARS](https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/sql/enabling-multiple-active-result-sets)
   in connection string for SQL Server 2005 and later?
+* Check for `xs:type`/`msdata:DataType` mismatch which could lead to
+  corruption warned about in
+  https://docs.microsoft.com/en-us/dotnet/api/system.data.dataset.readxmlschema
 * Wrap code for use as Cmdlet
-* Package for Choco
+* Package for NuGet/Chocolatey
+* Find (or write) a schema to check the TypedDataset XSD for validity (to
+  catch errors like invalid attribute names/values).  Does Microsoft document
+  these XML Namespaces anywhere?
+  urn:schemas-microsoft-com:xml-msdatasource
+  urn:schemas-microsoft-com:xml-msdata
+  urn:schemas-microsoft-com:xml-msprop
