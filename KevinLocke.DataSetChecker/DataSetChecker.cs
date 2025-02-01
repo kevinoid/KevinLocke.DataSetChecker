@@ -106,16 +106,12 @@ namespace KevinLocke.DataSetChecker
             bool hasSpDescribe = false;
             try
             {
-                using (SqlCommand sqlCommand = new("sp_describe_first_result_set", sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("tsql", "SELECT 1");
+                using SqlCommand sqlCommand = new("sp_describe_first_result_set", sqlConnection);
+                sqlCommand.CommandType = CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("tsql", "SELECT 1");
 
-                    using (SqlDataReader sqlDataReader = sqlCommand.ExecuteReader())
-                    {
-                        hasSpDescribe = sqlDataReader.HasRows;
-                    }
-                }
+                using SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+                hasSpDescribe = sqlDataReader.HasRows;
             }
             catch (SqlException ex)
             {
@@ -414,18 +410,14 @@ namespace KevinLocke.DataSetChecker
             CommandType commandType,
             SqlParameter[] sqlParameters)
         {
-            using (SqlCommand sqlCommand = new(commandText, this.sqlConnectionFmtOnly))
-            {
-                sqlCommand.CommandType = commandType;
-                sqlCommand.Parameters.AddRange(sqlParameters);
-                using (SqlDataReader sqlDataReader = sqlCommand.ExecuteReader())
-                {
-                    Debug.Assert(!sqlDataReader.HasRows, "FMTONLY queries shouldn't have rows");
-                    Debug.Assert(sqlDataReader.RecordsAffected <= 0, "FMTONLY queries shouldn't affect records");
+            using SqlCommand sqlCommand = new(commandText, this.sqlConnectionFmtOnly);
+            sqlCommand.CommandType = commandType;
+            sqlCommand.Parameters.AddRange(sqlParameters);
+            using SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+            Debug.Assert(!sqlDataReader.HasRows, "FMTONLY queries shouldn't have rows");
+            Debug.Assert(sqlDataReader.RecordsAffected <= 0, "FMTONLY queries shouldn't affect records");
 
-                    // TODO: Check column names/types
-                }
-            }
+            // TODO: Check column names/types
         }
 
         protected void CheckCommandSPDescribe(
@@ -433,23 +425,19 @@ namespace KevinLocke.DataSetChecker
             IEnumerable<SqlParameter> sqlParameters)
         {
             string paramsDecl = this.GetSqlDeclaration(sqlParameters);
-            using (SqlCommand sqlCommand = new("sp_describe_first_result_set", this.sqlConnectionSpDescribe))
+            using SqlCommand sqlCommand = new("sp_describe_first_result_set", this.sqlConnectionSpDescribe);
+            sqlCommand.CommandType = CommandType.StoredProcedure;
+            sqlCommand.Parameters.Add(new SqlParameter
             {
-                sqlCommand.CommandType = CommandType.StoredProcedure;
-                sqlCommand.Parameters.Add(new SqlParameter
-                {
-                    ParameterName = "tsql",
-                    Size = -1,
-                    SqlDbType = SqlDbType.NVarChar,
-                    Value = commandText,
-                });
-                sqlCommand.Parameters.AddWithValue("params", paramsDecl);
+                ParameterName = "tsql",
+                Size = -1,
+                SqlDbType = SqlDbType.NVarChar,
+                Value = commandText,
+            });
+            sqlCommand.Parameters.AddWithValue("params", paramsDecl);
 
-                using (SqlDataReader sqlDataReader = sqlCommand.ExecuteReader())
-                {
-                    // TODO: Check column names/types
-                }
-            }
+            using SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+            // TODO: Check column names/types
         }
 
         protected SqlParameter ConvertParameter(XmlNode parameterNode)
