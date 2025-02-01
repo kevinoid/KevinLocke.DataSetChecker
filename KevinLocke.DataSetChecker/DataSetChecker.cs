@@ -134,7 +134,6 @@ namespace KevinLocke.DataSetChecker
 
         public event EventHandler<DataSetCheckerEventArgs> DataSetCheckerEventHandler;
 
-
         public void Dispose()
         {
             this.sqlConnectionFmtOnly?.Dispose();
