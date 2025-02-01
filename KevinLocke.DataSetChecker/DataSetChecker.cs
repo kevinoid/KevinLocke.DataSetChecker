@@ -30,7 +30,7 @@ namespace KevinLocke.DataSetChecker
         private static readonly XmlNamespaceManager MsDsNsManager =
             CreateNamespaceManager();
 
-        private static readonly Dictionary<SqlDbType, object> ParameterDefaultValues = new Dictionary<SqlDbType, object>
+        private static readonly Dictionary<SqlDbType, object> ParameterDefaultValues = new()
         {
             { SqlDbType.BigInt, 0L },
             { SqlDbType.Binary, Array.Empty<byte>() },
@@ -62,7 +62,7 @@ namespace KevinLocke.DataSetChecker
             { SqlDbType.Xml, new SqlXml() },
         };
 
-        private static readonly Dictionary<string, string> ParameterPropToAttr = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> ParameterPropToAttr = new()
         {
             { "IsNullable", "AllowDbNull" },
             { "ProviderType", "SqlDbType" }
@@ -83,7 +83,7 @@ namespace KevinLocke.DataSetChecker
         /// <c>""</c>.
         /// </remarks>
         private static readonly Regex SqlServerParameterNameRegex =
-            new Regex(@"^[\p{L}\p{Nd}@#$_]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+            new(@"^[\p{L}\p{Nd}@#$_]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         private readonly SqlConnection sqlConnectionFmtOnly;
         private readonly SqlConnection sqlConnectionSpDescribe;
@@ -100,13 +100,13 @@ namespace KevinLocke.DataSetChecker
                 throw new ArgumentNullException(nameof(connectionString));
             }
 
-            SqlConnection sqlConnection = new SqlConnection(connectionString);
+            SqlConnection sqlConnection = new(connectionString);
             sqlConnection.Open();
 
             bool hasSpDescribe = false;
             try
             {
-                using (SqlCommand sqlCommand = new SqlCommand("sp_describe_first_result_set", sqlConnection))
+                using (SqlCommand sqlCommand = new("sp_describe_first_result_set", sqlConnection))
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;
                     sqlCommand.Parameters.AddWithValue("tsql", "SELECT 1");
@@ -132,7 +132,7 @@ namespace KevinLocke.DataSetChecker
                 this.sqlConnectionSpDescribe.Open();
             }
 
-            using (SqlCommand sqlCommand = new SqlCommand("SET FMTONLY ON", sqlConnection))
+            using (SqlCommand sqlCommand = new("SET FMTONLY ON", sqlConnection))
             {
                 sqlCommand.ExecuteNonQuery();
                 this.sqlConnectionFmtOnly = sqlConnection;
@@ -157,7 +157,7 @@ namespace KevinLocke.DataSetChecker
         /// <returns>0 if the XSD passes all checks.  1 Otherwise.</returns>
         public static int Main(string[] args)
         {
-            DataSetCheckerOptions options = new DataSetCheckerOptions();
+            DataSetCheckerOptions options = new();
             OptionSet optionSet = GetOptionSetFor(options);
             try
             {
@@ -183,7 +183,7 @@ namespace KevinLocke.DataSetChecker
             }
 
             int exitCode = 0;
-            using (DataSetChecker checker = new DataSetChecker(options.ConnectionString))
+            using (DataSetChecker checker = new(options.ConnectionString))
             {
                 checker.DataSetCheckerEventHandler += (object sender, DataSetCheckerEventArgs eventArgs) =>
                 {
@@ -224,7 +224,7 @@ namespace KevinLocke.DataSetChecker
             // https://docs.microsoft.com/en-us/visualstudio/code-quality/ca3075-insecure-dtd-processing
             //
             // If anyone is using these in practice, can add option to allow.
-            XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+            XmlReaderSettings xmlReaderSettings = new();
             xmlReaderSettings.DtdProcessing = DtdProcessing.Prohibit;
             xmlReaderSettings.XmlResolver = null;
 
@@ -414,7 +414,7 @@ namespace KevinLocke.DataSetChecker
             CommandType commandType,
             SqlParameter[] sqlParameters)
         {
-            using (SqlCommand sqlCommand = new SqlCommand(commandText, this.sqlConnectionFmtOnly))
+            using (SqlCommand sqlCommand = new(commandText, this.sqlConnectionFmtOnly))
             {
                 sqlCommand.CommandType = commandType;
                 sqlCommand.Parameters.AddRange(sqlParameters);
@@ -433,7 +433,7 @@ namespace KevinLocke.DataSetChecker
             IEnumerable<SqlParameter> sqlParameters)
         {
             string paramsDecl = this.GetSqlDeclaration(sqlParameters);
-            using (SqlCommand sqlCommand = new SqlCommand("sp_describe_first_result_set", this.sqlConnectionSpDescribe))
+            using (SqlCommand sqlCommand = new("sp_describe_first_result_set", this.sqlConnectionSpDescribe))
             {
                 sqlCommand.CommandType = CommandType.StoredProcedure;
                 sqlCommand.Parameters.Add(new SqlParameter
@@ -459,7 +459,7 @@ namespace KevinLocke.DataSetChecker
                 throw new ArgumentNullException(nameof(parameterNode));
             }
 
-            SqlParameter sqlParameter = new SqlParameter();
+            SqlParameter sqlParameter = new();
             foreach (PropertyInfo propertyInfo in typeof(SqlParameter).GetProperties())
             {
                 string propName = propertyInfo.Name;
@@ -515,7 +515,7 @@ namespace KevinLocke.DataSetChecker
 
         private static XmlNamespaceManager CreateNamespaceManager()
         {
-            XmlNamespaceManager msDsNsManager = new XmlNamespaceManager(new NameTable());
+            XmlNamespaceManager msDsNsManager = new(new NameTable());
             msDsNsManager.AddNamespace("msds", DataSetConstants.MsDsNamespace);
             return msDsNsManager;
         }
@@ -528,7 +528,7 @@ namespace KevinLocke.DataSetChecker
                 return string.Empty;
             }
 
-            StringBuilder declaration = new StringBuilder();
+            StringBuilder declaration = new();
             foreach (SqlParameter parameter in parameters)
             {
                 string parameterName = parameter.ParameterName;
@@ -564,7 +564,7 @@ namespace KevinLocke.DataSetChecker
         private void LogError(string message, XmlNode node, Exception exception = null)
         {
             // FIXME: Throw if no EventHandler?
-            DataSetCheckerEventArgs eventArgs = new DataSetCheckerEventArgs(
+            DataSetCheckerEventArgs eventArgs = new(
                 XmlSeverityType.Error,
                 message,
                 node,
@@ -575,7 +575,7 @@ namespace KevinLocke.DataSetChecker
         private void LogWarning(string message, XmlNode node, Exception exception = null)
         {
             // FIXME: Throw if no EventHandler?
-            DataSetCheckerEventArgs eventArgs = new DataSetCheckerEventArgs(
+            DataSetCheckerEventArgs eventArgs = new(
                 XmlSeverityType.Warning,
                 message,
                 node,

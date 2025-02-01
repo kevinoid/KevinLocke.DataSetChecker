@@ -15,7 +15,7 @@ namespace KevinLocke.DataSetChecker
     /// </summary>
     public class DataSetXPathFinder : XPathFinder
     {
-        private static readonly Dictionary<string, string[]> UniqueAttrNamesByLocalName = new Dictionary<string, string[]>
+        private static readonly Dictionary<string, string[]> UniqueAttrNamesByLocalName = new()
         {
             {
                 "DbSource",
