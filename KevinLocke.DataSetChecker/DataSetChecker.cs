@@ -457,7 +457,7 @@ namespace KevinLocke.DataSetChecker
                 string attrName = propName switch
                 {
                     "IsNullable" => "AllowDbNull",
-                    "ProviderType" => "SqlDbType",
+                    "SqlDbType" => "ProviderType",
                     _ => propName,
                 };
 
