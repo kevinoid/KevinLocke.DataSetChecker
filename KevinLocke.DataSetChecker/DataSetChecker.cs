@@ -487,6 +487,10 @@ namespace KevinLocke.DataSetChecker
                 SqlDbType.SmallDateTime => new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
                 SqlDbType.SmallInt => (short)0,
                 SqlDbType.SmallMoney => 0m,
+
+                // Note: Could be DataTable, DbDataReader or IEnumerable<SqlDataRecord>
+                // https://learn.microsoft.com/dotnet/framework/data/adonet/sql/table-valued-parameters#configuring-a-sqlparameter-example
+                SqlDbType.Structured => new DataTable(),
                 SqlDbType.Text => string.Empty,
                 SqlDbType.Time => default(TimeSpan),
                 SqlDbType.Timestamp => Array.Empty<byte>(),
