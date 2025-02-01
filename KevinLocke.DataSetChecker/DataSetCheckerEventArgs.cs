@@ -15,26 +15,21 @@ namespace KevinLocke.DataSetChecker
     {
         private static readonly DataSetXPathFinder XPathFinder = new();
 
-        private readonly Exception exception;
-        private readonly string message;
-        private readonly XmlNode node;
-        private readonly XmlSeverityType severity;
-
         internal DataSetCheckerEventArgs(XmlSeverityType severity, string message, XmlNode node, Exception exception)
         {
-            this.message = message ?? throw new ArgumentNullException(nameof(message));
-            this.severity = severity;
-            this.node = node;
-            this.exception = exception;
+            this.Message = message ?? throw new ArgumentNullException(nameof(message));
+            this.Severity = severity;
+            this.Node = node;
+            this.Exception = exception;
         }
 
-        public Exception Exception => this.exception;
+        public Exception Exception { get; }
 
-        public string Message => this.message;
+        public string Message { get; }
 
-        public XmlNode Node => this.node;
+        public XmlNode Node { get; }
 
-        public XmlSeverityType Severity => this.severity;
+        public XmlSeverityType Severity { get; }
 
         public override string ToString()
         {
