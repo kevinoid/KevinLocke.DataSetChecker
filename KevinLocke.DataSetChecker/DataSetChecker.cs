@@ -495,10 +495,13 @@ namespace KevinLocke.DataSetChecker
                 SqlDbType.Time => default(TimeSpan),
                 SqlDbType.Timestamp => Array.Empty<byte>(),
                 SqlDbType.TinyInt => (byte)0,
+                SqlDbType.Udt => throw new NotImplementedException("Unable to determine value for non-nullable Udt"),
                 SqlDbType.UniqueIdentifier => default(Guid),
                 SqlDbType.VarBinary => Array.Empty<byte>(),
                 SqlDbType.VarChar => string.Empty,
+                SqlDbType.Variant => throw new NotImplementedException("Unable to determine value for non-nullable Variant"),
                 SqlDbType.Xml => new SqlXml(),
+                _ => throw new NotImplementedException("Unsupported SqlDbType"),
             };
         }
 
