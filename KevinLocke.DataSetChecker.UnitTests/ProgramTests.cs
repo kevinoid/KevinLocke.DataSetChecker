@@ -2,7 +2,7 @@
 // Copyright 2019-2025 Kevin Locke.  All rights reserved.
 // </copyright>
 
-namespace NetCoreProject.UnitTests
+namespace KevinLocke.DataSetChecker.UnitTests
 {
     using Xunit;
 

@@ -1,0 +1,3 @@
+#nullable enable
+KevinLocke.DataSetChecker.Program
+static KevinLocke.DataSetChecker.Program.Main(string![]! args) -> int

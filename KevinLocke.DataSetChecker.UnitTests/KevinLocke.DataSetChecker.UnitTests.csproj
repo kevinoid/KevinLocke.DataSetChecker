@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Unit tests for NetCoreProject.</Description>
+    <Description>Unit tests for KevinLocke.DataSetChecker.</Description>
 
     <!-- Multi-target all frameworks to test, newest first (for VS runner) -->
     <TargetFrameworks>net9.0</TargetFrameworks>
@@ -94,7 +94,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NetCoreProject\NetCoreProject.csproj" />
+    <ProjectReference Include="..\KevinLocke.DataSetChecker\KevinLocke.DataSetChecker.csproj" />
   </ItemGroup>
 
 </Project>

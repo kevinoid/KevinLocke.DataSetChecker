@@ -120,7 +120,7 @@ jobs:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
-        directory: NetCoreProject.UnitTests/TestResults
+        directory: KevinLocke.DataSetChecker.UnitTests/TestResults
     - name: Upload coverage to Coveralls
       uses: coverallsapp/github-action@v2
       # Ignore intermittent server errors (which are out of our control).

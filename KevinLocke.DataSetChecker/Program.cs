@@ -2,7 +2,7 @@
 // Copyright 2019-2025 Kevin Locke.  All rights reserved.
 // </copyright>
 
-namespace NetCoreProject
+namespace KevinLocke.DataSetChecker
 {
     public static class Program
     {
