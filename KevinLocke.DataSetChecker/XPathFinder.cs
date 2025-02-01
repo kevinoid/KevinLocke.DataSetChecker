@@ -16,7 +16,7 @@ namespace KevinLocke.DataSetChecker
     /// </summary>
     public class XPathFinder
     {
-        private static readonly Dictionary<XmlNodeType, string> NodeTypeTest = new Dictionary<XmlNodeType, string>
+        private static readonly Dictionary<XmlNodeType, string> NodeTypeTest = new()
         {
             { XmlNodeType.Comment, "comment()" },
             { XmlNodeType.ProcessingInstruction, "processing-instruction()" },
@@ -44,7 +44,7 @@ namespace KevinLocke.DataSetChecker
                 throw new ArgumentNullException(nameof(node));
             }
 
-            List<string> steps = new List<string>();
+            List<string> steps = new();
             while (node != null && node != context)
             {
                 XmlNodeType nodeType = node.NodeType;

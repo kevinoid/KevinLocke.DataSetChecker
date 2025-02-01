@@ -13,7 +13,7 @@ namespace KevinLocke.DataSetChecker
 
     public class DataSetCheckerEventArgs : EventArgs
     {
-        private static readonly DataSetXPathFinder XPathFinder = new DataSetXPathFinder();
+        private static readonly DataSetXPathFinder XPathFinder = new();
 
         private readonly Exception exception;
         private readonly string message;
@@ -38,7 +38,7 @@ namespace KevinLocke.DataSetChecker
 
         public override string ToString()
         {
-            StringBuilder errMsg = new StringBuilder();
+            StringBuilder errMsg = new();
             errMsg.Append(this.Severity).Append(": ").Append(this.Message);
 
             if (this.Node != null)
