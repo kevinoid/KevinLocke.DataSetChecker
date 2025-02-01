@@ -65,7 +65,7 @@ namespace KevinLocke.DataSetChecker
         private static readonly Dictionary<string, string> ParameterPropToAttr = new()
         {
             { "IsNullable", "AllowDbNull" },
-            { "ProviderType", "SqlDbType" }
+            { "ProviderType", "SqlDbType" },
         };
 
         /// <summary>

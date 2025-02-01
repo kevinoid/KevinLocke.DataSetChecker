@@ -20,7 +20,7 @@ namespace KevinLocke.DataSetChecker
         {
             { XmlNodeType.Comment, "comment()" },
             { XmlNodeType.ProcessingInstruction, "processing-instruction()" },
-            { XmlNodeType.Text, "text()" }
+            { XmlNodeType.Text, "text()" },
         };
 
         public string FindXPath(XmlNode node)
