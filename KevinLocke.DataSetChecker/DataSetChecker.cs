@@ -64,12 +64,6 @@ namespace KevinLocke.DataSetChecker
             { SqlDbType.Xml, new SqlXml() },
         };
 
-        private static readonly Dictionary<string, string> ParameterPropToAttr = new()
-        {
-            { "IsNullable", "AllowDbNull" },
-            { "ProviderType", "SqlDbType" },
-        };
-
         /// <summary>
         /// Regular expression to match a valid SQL Server parameter.
         /// </summary>
@@ -460,11 +454,12 @@ namespace KevinLocke.DataSetChecker
             foreach (PropertyInfo propertyInfo in typeof(SqlParameter).GetProperties())
             {
                 string propName = propertyInfo.Name;
-
-                if (!ParameterPropToAttr.TryGetValue(propName, out string attrName))
+                string attrName = propName switch
                 {
-                    attrName = propName;
-                }
+                    "IsNullable" => "AllowDbNull",
+                    "ProviderType" => "SqlDbType",
+                    _ => propName,
+                };
 
                 XmlAttribute xmlAttribute = parameterNode.Attributes[attrName];
                 if (xmlAttribute == null)
