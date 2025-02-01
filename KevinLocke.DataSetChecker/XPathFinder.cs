@@ -124,9 +124,16 @@ namespace KevinLocke.DataSetChecker
                 throw new ArgumentNullException(nameof(siblingIsMatch));
             }
 
+            XmlNode parentNode = node.ParentNode;
+            if (parentNode == null)
+            {
+                // Root element is unique.  No predicate needed.
+                return string.Empty;
+            }
+
             int nodePosition = 0;
             int position = 1;
-            IEnumerable<XmlNode> siblingNodes = node.ParentNode.ChildNodes
+            IEnumerable<XmlNode> siblingNodes = parentNode.ChildNodes
                 .Cast<XmlNode>()
                 .Where(node => siblingIsMatch(node));
             foreach (XmlNode siblingNode in siblingNodes)
