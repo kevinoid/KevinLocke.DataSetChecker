@@ -1,0 +1,144 @@
+# GitHub Actions Workflow configuration
+# https://docs.github.com/actions/reference/workflow-syntax-for-github-actions
+# https://github.com/actions/starter-workflows/blob/main/ci/dotnet-core.yml
+
+name: .NET
+
+# Note: on key treated as boolean key by YAML
+# https://github.com/adrienverge/yamllint/issues/158#issuecomment-454313233
+# However, GitHub Actions documentation is consistent in using it unquoted.
+on:   # yamllint disable-line rule:truthy
+  pull_request:
+    branches-ignore:
+    - template
+  push:
+    branches-ignore:
+    - template
+  schedule:
+  # Run once a day (at 8:40 AM UTC) to check for exogenous breakage.
+  # TODO: Run when dependencies are updated.  (Like Dependabot, but on
+  # in-range updates and without sending a PR.)
+  - cron: '40 8 * * *'
+
+jobs:
+  test:
+    name: Test dotnet ${{ matrix.dotnet }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+        # Uncomment to test on macOS:
+        # - macos-latest
+        # Use Ubuntu 22.04 until ICU and SSL issues with .NET 9 are resolved
+        # (.NET 9 requires libicu70+libssl1.1, 24.04 has libicu74+libssl3t64)
+        - ubuntu-22.04
+        - windows-latest
+        dotnet:
+        # Test using latest released SDK
+        # Note: Wildcard version resolves to latest LTS, not latest/STS
+        # https://github.com/actions/setup-dotnet/issues/497#issuecomment-2489645065
+        # - '*'
+        # Note: Must quote value to avoid 9.0 becoming 9, which silently fails.
+        - '9.0'
+        # Uncomment to build using an earlier SDK version:
+        # - 3.1
+    env:
+      # Save NuGet packages in workspace for better performance on Windows.
+      # GitHub-hosted runners are Azure Standard_DS2_v2 VMs with workspace
+      # on Azure "temporary drive" which has much higher IOPS than OS drive.
+      # https://docs.microsoft.com/azure/virtual-machines/dv2-dsv2-series#dsv2-series
+      # https://docs.microsoft.com/nuget/Consume-Packages/managing-the-global-packages-and-cache-folders
+      #
+      # Use .nuget/packages, as suggested by
+      # https://github.com/actions/cache/blob/main/examples.md#c---nuget
+      # and because dotfiles are ignored by MSBuild by default
+      # https://github.com/dotnet/sdk/blob/v5.0.101-servicing.20601.7/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.Sdk.DefaultItems.targets#L40
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up .NET ${{ matrix.dotnet }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ matrix.dotnet }}
+    # Install framework versions to test
+    # TODO: Install TargetFrameworks from .csproj.
+    #       Step to run custom MSBuild target to output $(TargetFrameworks)?
+    - name: Set up .NET Core 3.1
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '3.1'
+    - name: Display .NET version
+      run: dotnet --info
+    - name: Install dependencies
+      run: dotnet restore
+    # Manually check for deprecated dependencies until
+    # https://github.com/NuGet/Home/issues/12244 is fixed
+    - name: Check for deprecated dependencies
+      shell: bash
+      run: |
+        deprecated=$(dotnet list package --deprecated)
+        echo "$deprecated"
+        nodep_count=$(grep -c 'no deprecated packages' <<<"$deprecated")
+        # Ensure "no deprecated packages" count matches project count
+        test "$nodep_count" -eq 2
+    # Note: Separate `dotnet build` step before `dotnet test` causes coverage
+    # collection to fail when there are generated source files (e.g. Nullable):
+    # https://github.com/coverlet-coverage/coverlet/issues/766#issuecomment-601062528
+    # https://github.com/dotnet/sdk/issues/10914
+    - name: Build and Test
+      run: "dotnet test
+        --no-restore
+        --settings TestCoverage.runsettings
+        "
+    # Rename coverage.info to lcov.info for the coveralls uploader:
+    # https://github.com/coverallsapp/coverage-reporter/issues/36
+    #
+    # TODO: output TFM for each lcov for coveralls tag.  Complicated due
+    # to unavoidable GUID <https://github.com/microsoft/vstest/issues/2378>.
+    # - Could parse console output to match TFM from binary to attachment UUID.
+    #   Can't log to file <https://github.com/Microsoft/vstest/issues/680>
+    #   <https://github.com/microsoft/vstest/issues/2224>
+    # - When trx logger enabled, copy saved in dir with same name, overwritten
+    #   by each TFM since LogFilePrefix configuration doesn't apply to dir.
+    # - Could merge coverage files after VSTest using pwsh:
+    # https://github.com/coverlet-coverage/coverlet/pull/225#issuecomment-573896446
+    # - Different RunSettingsFilePath for each TargetFramework?
+    #   https://github.com/microsoft/vstest/pull/2272
+    # - Could force separate VSTest run for each TFM.
+    # Note: Unlike coverlet.msbuild, VSTest does not set output properties
+    # @(CoverletReport).  AfterTargets="VSTest" only useful for sequencing.
+    - name: Rename coverage file(s)
+      shell: bash
+      run: |-
+        for lcov_path in *.UnitTests/TestResults/*/coverage.info; do
+            if [ -e "$lcov_path" ]; then
+                mv -nv "$lcov_path" "${lcov_path%/coverage.info}/lcov.info"
+            fi
+        done
+    # Note: Codecov has poor support for matrix builds
+    # https://github.com/codecov/codecov-action/issues/40
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        directory: KevinLocke.DataSetChecker.UnitTests/TestResults
+    - name: Upload coverage to Coveralls
+      uses: coverallsapp/github-action@v2
+      # Ignore intermittent server errors (which are out of our control).
+      # https://github.com/coverallsapp/github-action/issues/9
+      # https://github.com/coverallsapp/github-action/issues/79
+      # https://github.com/coverallsapp/github-action/issues/93
+      continue-on-error: true
+      with:
+        flag-name: ${{ matrix.os }}_${{ matrix.dotnet }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        parallel: true
+
+  finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Coveralls Finished
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.github_token }}
+        parallel-finished: true

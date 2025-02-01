@@ -1,25 +1,35 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Typed DataSet query checker.</Description>
+    <Description>Unit tests for KevinLocke.DataSetChecker.</Description>
 
-    <TargetFramework>net4.7</TargetFramework>
+    <!-- Multi-target all frameworks to test, newest first (for VS runner) -->
+    <TargetFrameworks>net4.7</TargetFrameworks>
+    <!-- Test older frameworks in CI (to avoid requiring devs to install) -->
+    <!--
+      TODO: Test opportunistically outside of CI?
+      https://docs.microsoft.com/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
+      Newtonsoft.Json passes TestFrameworks from checks in build.ps1.  Painful.
+    -->
+    <TargetFrameworks Condition="'$(CI)' == 'True'">$(TargetFrameworks);netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks Condition="'$(CI)' == 'True' and $([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net462</TargetFrameworks>
 
-    <OutputType>Exe</OutputType>
+    <!--
+      Disable check for EOL Target Framework (NETSDK1138).
+      Libraries may want to test against unsupported frameworks to accommodate
+      users or simplify upgrade paths.  No need to warn or fail build.
+    -->
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
 
-    <!-- Configure class with Main method entry point -->
-    <StartupObject>KevinLocke.DataSetChecker.DataSetChecker</StartupObject>
-
-    <!-- Uncomment to embed a .ico file as the win32 icon resource -->
-    <!-- <ApplicationIcon>KevinLocke.DataSetChecker.ico<ApplicationIcon> -->
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,6 +49,10 @@
       Microsoft.CodeAnalysis.VersionCheckAnalyzer (NetAnalyzers dep only)
       Text.Analyzers (https://github.com/dotnet/roslyn-analyzers/issues/2200)
     -->
+    <PackageReference Include="coverlet.collector" Version="6.0.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="ErrorProne.NET.CoreAnalyzers" Version="0.1.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -55,7 +69,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Mono.Options" Version="6.12.0.148" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <!-- TODO: Add Microsoft.EntityFrameworkCore.Analyzers for EF Core proj -->
     <PackageReference Include="Roslynator.Analyzers" Version="4.12.11">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -70,16 +85,16 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
 
-  <!--
-    Make members declared with internal visibility accessible from the
-    UnitTests assembly with a corresponding name.
-    https://stackoverflow.com/a/49978185
-  -->
   <ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>$(AssemblyName).UnitTests</_Parameter1>
-    </AssemblyAttribute>
+    <ProjectReference Include="..\KevinLocke.DataSetChecker\KevinLocke.DataSetChecker.csproj" />
   </ItemGroup>
+
 </Project>

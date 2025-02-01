@@ -1,0 +1,20 @@
+# Shared editor configuration <https://editorconfig.org>
+
+[*.cs]
+
+# Limit CA1707 "Identifiers should not contain underscores"
+# Many common test naming conventions use underscores.
+# Since tests are public methods, only warn when identifiers for private or
+# internal symbols contain underscores.
+dotnet_code_quality.CA1707.api_surface = private, internal
+# Suggest "Avoid constant arrays as arguments"
+# Test data is often written inline for clarity
+dotnet_diagnostic.CA1861.severity = suggestion
+# Disable CA2007: Consider calling ConfigureAwait on the awaited task
+# Calling .ConfigureAwait(false) is contraindicated for xUnit:
+# https://xunit.net/xunit.analyzers/rules/xUnit1030
+dotnet_diagnostic.CA2007.severity = none
+# Ignore "Arrays as attribute arguments is not CLS-compliant"
+# xUnit's InlineDataAttribute triggers this warning, which is unavoidable.
+# The risks of violating this rule for UnitTests is smaller than the gain.
+dotnet_diagnostic.CS3016.severity = silent
