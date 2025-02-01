@@ -293,7 +293,47 @@ namespace KevinLocke.DataSetChecker
                             if (parameterNode.NamespaceURI == DataSetConstants.MsDsNamespace && parameterNode.LocalName == "Parameter")
                             {
                                 SqlParameter sqlParameter = this.ConvertParameter(parameterNode);
-                                sqlParameter.Value = this.GetParameterValue(sqlParameter);
+
+                                if (sqlParameter.SqlDbType == SqlDbType.Structured
+                                    && string.IsNullOrEmpty(sqlParameter.TypeName))
+                                {
+                                    this.LogWarning(
+                                        Invariant($"Unable to check query with Structured parameter without TypeName ({sqlParameter.ParameterName})"),
+                                        parameterNode);
+                                    return;
+                                }
+
+                                if (sqlParameter.SqlDbType == SqlDbType.Udt
+                                    && string.IsNullOrEmpty(sqlParameter.UdtTypeName))
+                                {
+                                    this.LogError(
+                                        Invariant($"Unable to check query with Udt parameter without UdtTypeName ({sqlParameter.ParameterName})"),
+                                        parameterNode);
+                                    return;
+                                }
+
+                                if (sqlParameter.SqlDbType == SqlDbType.Variant
+                                    && !sqlParameter.IsNullable)
+                                {
+                                    this.LogError(
+                                        Invariant($"Unable to check query with non-nullable Variant parameter ({sqlParameter.ParameterName})"),
+                                        parameterNode);
+                                    return;
+                                }
+
+                                try
+                                {
+                                    sqlParameter.Value = this.GetParameterValue(sqlParameter);
+                                }
+                                catch (NotImplementedException ex)
+                                {
+                                    this.LogError(
+                                       Invariant($"Unable to get value for parameter {sqlParameter.ParameterName}"),
+                                       parameterNode,
+                                       ex);
+                                    return;
+                                }
+
                                 sqlParameters.Add(sqlParameter);
                             }
                         }
