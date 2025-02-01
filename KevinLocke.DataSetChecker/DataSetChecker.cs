@@ -335,6 +335,10 @@ namespace KevinLocke.DataSetChecker
                         }
 
                         break;
+
+                    default:
+                        // Fallthrough.  Not currently of interest.
+                        break;
                 }
             }
 
