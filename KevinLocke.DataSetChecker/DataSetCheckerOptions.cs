@@ -14,7 +14,7 @@ namespace KevinLocke.DataSetChecker
     public class DataSetCheckerOptions : DataSetCheckerSettings
     {
         public ICollection<string> DataSetFilePaths { get; } =
-            new List<string>();
+            [];
 
         public bool ShowHelp { get; set; }
     }

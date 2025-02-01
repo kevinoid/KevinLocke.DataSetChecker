@@ -44,7 +44,7 @@ namespace KevinLocke.DataSetChecker
                 throw new ArgumentNullException(nameof(node));
             }
 
-            List<string> steps = new();
+            List<string> steps = [];
             while (node != null && node != context)
             {
                 XmlNodeType nodeType = node.NodeType;

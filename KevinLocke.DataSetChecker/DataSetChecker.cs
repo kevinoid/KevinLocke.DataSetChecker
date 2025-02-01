@@ -321,7 +321,7 @@ namespace KevinLocke.DataSetChecker
                         break;
 
                     case "Parameters":
-                        sqlParameters = new List<SqlParameter>();
+                        sqlParameters = [];
                         foreach (XmlNode parameterNode in childNode.ChildNodes)
                         {
                             if (parameterNode.NamespaceURI == DataSetConstants.MsDsNamespace && parameterNode.LocalName == "Parameter")
