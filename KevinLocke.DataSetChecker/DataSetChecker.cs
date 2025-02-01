@@ -32,38 +32,6 @@ namespace KevinLocke.DataSetChecker
         private static readonly XmlNamespaceManager MsDsNsManager =
             CreateNamespaceManager();
 
-        private static readonly Dictionary<SqlDbType, object> ParameterDefaultValues = new()
-        {
-            { SqlDbType.BigInt, 0L },
-            { SqlDbType.Binary, Array.Empty<byte>() },
-            { SqlDbType.Bit, false },
-            { SqlDbType.Char, " " },
-            { SqlDbType.Date, new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Unspecified) },
-            { SqlDbType.DateTime, new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Unspecified) },
-            { SqlDbType.DateTime2, new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Unspecified) },
-            { SqlDbType.DateTimeOffset, new DateTimeOffset(new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Unspecified)) },
-            { SqlDbType.Decimal, 0m },
-            { SqlDbType.Float, 0d },
-            { SqlDbType.Image, Array.Empty<byte>() },
-            { SqlDbType.Int, 0 },
-            { SqlDbType.Money, 0m },
-            { SqlDbType.NChar, string.Empty },
-            { SqlDbType.NText, string.Empty },
-            { SqlDbType.NVarChar, string.Empty },
-            { SqlDbType.Real, 0f },
-            { SqlDbType.SmallDateTime, new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Unspecified) },
-            { SqlDbType.SmallInt, (short)0 },
-            { SqlDbType.SmallMoney, 0m },
-            { SqlDbType.Text, string.Empty },
-            { SqlDbType.Time, default(TimeSpan) },
-            { SqlDbType.Timestamp, Array.Empty<byte>() },
-            { SqlDbType.TinyInt, (byte)0 },
-            { SqlDbType.UniqueIdentifier, default(Guid) },
-            { SqlDbType.VarBinary, Array.Empty<byte>() },
-            { SqlDbType.VarChar, string.Empty },
-            { SqlDbType.Xml, new SqlXml() },
-        };
-
         /// <summary>
         /// Regular expression to match a valid SQL Server parameter.
         /// </summary>
@@ -497,7 +465,37 @@ namespace KevinLocke.DataSetChecker
                 return DBNull.Value;
             }
 
-            return ParameterDefaultValues[sqlParameter.SqlDbType];
+            return sqlParameter.SqlDbType switch
+            {
+                SqlDbType.BigInt => 0L,
+                SqlDbType.Binary => Array.Empty<byte>(),
+                SqlDbType.Bit => false,
+                SqlDbType.Char => " ",
+                SqlDbType.Date => new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                SqlDbType.DateTime => new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                SqlDbType.DateTime2 => new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                SqlDbType.DateTimeOffset => new DateTimeOffset(new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Unspecified)),
+                SqlDbType.Decimal => 0m,
+                SqlDbType.Float => 0d,
+                SqlDbType.Image => Array.Empty<byte>(),
+                SqlDbType.Int => 0,
+                SqlDbType.Money => 0m,
+                SqlDbType.NChar => string.Empty,
+                SqlDbType.NText => string.Empty,
+                SqlDbType.NVarChar => string.Empty,
+                SqlDbType.Real => 0f,
+                SqlDbType.SmallDateTime => new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                SqlDbType.SmallInt => (short)0,
+                SqlDbType.SmallMoney => 0m,
+                SqlDbType.Text => string.Empty,
+                SqlDbType.Time => default(TimeSpan),
+                SqlDbType.Timestamp => Array.Empty<byte>(),
+                SqlDbType.TinyInt => (byte)0,
+                SqlDbType.UniqueIdentifier => default(Guid),
+                SqlDbType.VarBinary => Array.Empty<byte>(),
+                SqlDbType.VarChar => string.Empty,
+                SqlDbType.Xml => new SqlXml(),
+            };
         }
 
         protected virtual void OnDataSetCheckerEventHandler(DataSetCheckerEventArgs eventArgs)
