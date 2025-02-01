@@ -72,7 +72,6 @@ namespace KevinLocke.DataSetChecker
 
         /// <summary>
         /// Regular expression to match a valid SQL Server parameter.
-        /// https://docs.microsoft.com/en-us/sql/relational-databases/databases/database-identifiers
         /// </summary>
         /// <remarks>
         /// Leading @ made optional due to <see cref="SqlParameter"/> adding it
@@ -84,6 +83,9 @@ namespace KevinLocke.DataSetChecker
         /// <see cref="SqlParameter.ParameterName"/> supports <c>"@"</c>, not
         /// <c>""</c>.
         /// </remarks>
+        /// <seealso href="https://docs.microsoft.com/sql/relational-databases/databases/database-identifiers">
+        /// SQL Server Database Identifiers
+        /// </seealso>
         private static readonly Regex SqlServerParameterNameRegex =
             new(@"^[\p{L}\p{Nd}@#$_]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 

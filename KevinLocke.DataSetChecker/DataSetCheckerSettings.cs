@@ -14,7 +14,8 @@ namespace KevinLocke.DataSetChecker
     /// <remarks>
     /// Consider extending <see cref="ApplicationSettingsBase"/> for loading
     /// from configuration files as part of
-    /// https://docs.microsoft.com/en-us/dotnet/framework/winforms/advanced/application-settings-architecture
+    /// <a href="https://docs.microsoft.com/dotnet/framework/winforms/advanced/application-settings-architecture">
+    /// Application Settings Architecture</a>.
     /// </remarks>
     public class DataSetCheckerSettings
     {
