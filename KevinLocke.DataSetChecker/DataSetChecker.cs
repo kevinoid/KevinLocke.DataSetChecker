@@ -19,7 +19,9 @@ namespace KevinLocke.DataSetChecker
     using System.Text.RegularExpressions;
     using System.Xml;
     using System.Xml.Schema;
+
     using Mono.Options;
+
     using static System.FormattableString;
 
     /// <summary>
