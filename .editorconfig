@@ -210,6 +210,10 @@ dotnet_diagnostic.RCS1250.severity = none
 # Disable "'{0}' should not be thrown by user code."
 # Redundant with CA2201
 dotnet_diagnostic.S112.severity = none
+# Suggest "Remove this commented out code"
+# Due to false positive from semicolon in copyright text due to &gt;
+# https://github.com/SonarSource/sonar-dotnet/issues/8819
+dotnet_diagnostic.S125.severity = suggestion
 # Disable "Rename parameter 'X' to 'Y' to match the interface declaration."
 # Redundant with CA1725
 dotnet_diagnostic.S927.severity = none
