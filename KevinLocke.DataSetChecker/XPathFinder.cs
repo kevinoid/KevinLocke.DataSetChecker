@@ -8,6 +8,7 @@ namespace KevinLocke.DataSetChecker
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Xml;
 
     /// <summary>
@@ -125,24 +126,24 @@ namespace KevinLocke.DataSetChecker
 
             int nodePosition = 0;
             int position = 1;
-            foreach (XmlNode siblingNode in node.ParentNode.ChildNodes)
+            IEnumerable<XmlNode> siblingNodes = node.ParentNode.ChildNodes
+                .Cast<XmlNode>()
+                .Where(node => siblingIsMatch(node));
+            foreach (XmlNode siblingNode in siblingNodes)
             {
-                if (siblingIsMatch(siblingNode))
+                if (siblingNode == node)
                 {
-                    if (siblingNode == node)
-                    {
-                        nodePosition = position;
-                    }
-
-                    // Note: Don't return nodePosition == 1 && position == 1
-                    // since "[1]" predicate may be unnecessary.
-                    if (nodePosition > 0 && position > 1)
-                    {
-                        return "[" + nodePosition + "]";
-                    }
-
-                    ++position;
+                    nodePosition = position;
                 }
+
+                // Note: Don't return nodePosition == 1 && position == 1
+                // since "[1]" predicate may be unnecessary.
+                if (nodePosition > 0 && position > 1)
+                {
+                    return "[" + nodePosition + "]";
+                }
+
+                ++position;
             }
 
             return string.Empty;
