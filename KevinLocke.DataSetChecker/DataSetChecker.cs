@@ -443,6 +443,7 @@ namespace KevinLocke.DataSetChecker
             sqlCommand.Parameters.AddWithValue("params", paramsDecl);
 
             using SqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
+
             // TODO: Check column names/types
         }
 
