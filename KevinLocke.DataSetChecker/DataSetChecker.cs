@@ -220,9 +220,11 @@ namespace KevinLocke.DataSetChecker
             // https://docs.microsoft.com/en-us/visualstudio/code-quality/ca3075-insecure-dtd-processing
             //
             // If anyone is using these in practice, can add option to allow.
-            XmlReaderSettings xmlReaderSettings = new();
-            xmlReaderSettings.DtdProcessing = DtdProcessing.Prohibit;
-            xmlReaderSettings.XmlResolver = null;
+            XmlReaderSettings xmlReaderSettings = new()
+            {
+                DtdProcessing = DtdProcessing.Prohibit,
+                XmlResolver = null,
+            };
 
             XmlDocument xsdDocument;
             using (XmlReader xsdReader = XmlReader.Create(xsdUri, xmlReaderSettings))
