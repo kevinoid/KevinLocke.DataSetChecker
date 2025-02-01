@@ -114,12 +114,9 @@ namespace KevinLocke.DataSetChecker
                 hasSpDescribe = sqlDataReader.HasRows;
             }
             catch (SqlException ex)
+            when (ex.Number == 2812)
             {
-                if (ex.Number != 2812)
-                {
-                    // Error was not "Could not find stored procedure"
-                    throw;
-                }
+                // Fallthrough for "Could not find stored procedure"
             }
 
             if (hasSpDescribe)
