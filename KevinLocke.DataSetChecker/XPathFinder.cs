@@ -36,18 +36,14 @@ namespace KevinLocke.DataSetChecker
         /// Finds an XPath expression to a given <see cref="XmlNode"/> from a
         /// given context.
         /// </summary>
-        /// <param name="node">Node which the returned XPath will select.</param>
+        /// <param name="target">Node which the returned XPath will select.</param>
         /// <param name="context">Node from which the XPath will be run.
         /// If <c>null</c>, an absolute XPath is returned.</param>
-        /// <returns>An XPath expression which selects <paramref name="node"/>
+        /// <returns>An XPath expression which selects <paramref name="target"/>
         /// when run from <paramref name="context"/>.</returns>
-        public virtual string FindXPath(XmlNode node, XmlNode context)
+        public virtual string FindXPath(XmlNode target, XmlNode? context)
         {
-            if (node == null)
-            {
-                throw new ArgumentNullException(nameof(node));
-            }
-
+            XmlNode? node = target ?? throw new ArgumentNullException(nameof(target));
             List<string> steps = [];
             while (node != null && node != context)
             {

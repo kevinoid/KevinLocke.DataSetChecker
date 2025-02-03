@@ -52,7 +52,7 @@ namespace KevinLocke.DataSetChecker
             new(@"^[\p{L}\p{Nd}@#$_]+$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
         private readonly SqlConnection sqlConnectionFmtOnly;
-        private readonly SqlConnection sqlConnectionSpDescribe;
+        private readonly SqlConnection? sqlConnectionSpDescribe;
         private bool disposedValue;
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace KevinLocke.DataSetChecker
             }
         }
 
-        public event EventHandler<DataSetCheckerEventArgs> DataSetCheckerEventHandler;
+        public event EventHandler<DataSetCheckerEventArgs>? DataSetCheckerEventHandler;
 
         /// <summary>
         /// Entry-point to check a named XSD against a given collection.
@@ -136,7 +136,7 @@ namespace KevinLocke.DataSetChecker
             }
 
             int exitCode = 0;
-            using (DataSetChecker checker = new(options.ConnectionString))
+            using (DataSetChecker checker = new(options.ConnectionString!))
             {
                 checker.DataSetCheckerEventHandler += (object sender, DataSetCheckerEventArgs eventArgs) =>
                 {
@@ -247,8 +247,8 @@ namespace KevinLocke.DataSetChecker
                 throw new ArgumentNullException(nameof(dbCommand));
             }
 
-            string commandText = null;
-            List<SqlParameter> sqlParameters = null;
+            string? commandText = null;
+            List<SqlParameter>? sqlParameters = null;
             foreach (XmlNode childNode in dbCommand.ChildNodes)
             {
                 if (childNode.NamespaceURI != DataSetConstants.MsDsNamespace)
@@ -391,7 +391,7 @@ namespace KevinLocke.DataSetChecker
         protected void CheckCommand(
             string commandText,
             CommandType commandType,
-            ICollection<SqlParameter> sqlParameters)
+            ICollection<SqlParameter>? sqlParameters)
         {
             if (this.sqlConnectionSpDescribe != null)
             {
@@ -400,7 +400,7 @@ namespace KevinLocke.DataSetChecker
 
             if (this.sqlConnectionFmtOnly != null)
             {
-                SqlParameter[] sqlParametersArray = null;
+                SqlParameter[]? sqlParametersArray = null;
                 if (sqlParameters != null)
                 {
                     sqlParametersArray = new SqlParameter[sqlParameters.Count];
@@ -418,7 +418,7 @@ namespace KevinLocke.DataSetChecker
         protected void CheckCommandFormatOnly(
             string commandText,
             CommandType commandType,
-            SqlParameter[] sqlParameters)
+            SqlParameter[]? sqlParameters)
         {
             using SqlCommand sqlCommand = new(commandText, this.sqlConnectionFmtOnly);
             sqlCommand.CommandType = commandType;
@@ -432,7 +432,7 @@ namespace KevinLocke.DataSetChecker
 
         protected void CheckCommandSPDescribe(
             string commandText,
-            IEnumerable<SqlParameter> sqlParameters)
+            IEnumerable<SqlParameter>? sqlParameters)
         {
             string paramsDecl = this.GetSqlDeclaration(sqlParameters);
             using SqlCommand sqlCommand = new("sp_describe_first_result_set", this.sqlConnectionSpDescribe);
@@ -572,7 +572,7 @@ namespace KevinLocke.DataSetChecker
         }
 
         // FIXME: Is this really not implemented somewhere in ADO.NET?
-        private string GetSqlDeclaration(IEnumerable<SqlParameter> parameters)
+        private string GetSqlDeclaration(IEnumerable<SqlParameter>? parameters)
         {
             if (parameters == null)
             {
@@ -612,7 +612,7 @@ namespace KevinLocke.DataSetChecker
             return declaration.ToString(0, declaration.Length - 2);
         }
 
-        private void LogError(string message, XmlNode node, Exception exception = null)
+        private void LogError(string message, XmlNode? node, Exception? exception = null)
         {
             // FIXME: Throw if no EventHandler?
             DataSetCheckerEventArgs eventArgs = new(
@@ -623,7 +623,7 @@ namespace KevinLocke.DataSetChecker
             this.OnDataSetCheckerEventHandler(eventArgs);
         }
 
-        private void LogWarning(string message, XmlNode node, Exception exception = null)
+        private void LogWarning(string message, XmlNode? node, Exception? exception = null)
         {
             // FIXME: Throw if no EventHandler?
             DataSetCheckerEventArgs eventArgs = new(

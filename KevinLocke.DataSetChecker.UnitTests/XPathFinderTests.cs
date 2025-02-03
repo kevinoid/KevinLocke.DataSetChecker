@@ -15,7 +15,7 @@ namespace KevinLocke.DataSetChecker.UnitTests
         public static void FindXPath_ThrowsOnNull()
         {
             XPathFinder finder = new();
-            Assert.Throws<ArgumentNullException>(() => finder.FindXPath(null));
+            Assert.Throws<ArgumentNullException>(() => finder.FindXPath(null!));
         }
 
         [Fact]

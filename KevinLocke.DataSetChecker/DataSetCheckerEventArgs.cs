@@ -15,7 +15,7 @@ namespace KevinLocke.DataSetChecker
     {
         private static readonly DataSetXPathFinder XPathFinder = new();
 
-        internal DataSetCheckerEventArgs(XmlSeverityType severity, string message, XmlNode node, Exception exception)
+        internal DataSetCheckerEventArgs(XmlSeverityType severity, string message, XmlNode? node, Exception? exception)
         {
             this.Message = message ?? throw new ArgumentNullException(nameof(message));
             this.Severity = severity;
@@ -23,11 +23,11 @@ namespace KevinLocke.DataSetChecker
             this.Exception = exception;
         }
 
-        public Exception Exception { get; }
+        public Exception? Exception { get; }
 
         public string Message { get; }
 
-        public XmlNode Node { get; }
+        public XmlNode? Node { get; }
 
         public XmlSeverityType Severity { get; }
 
