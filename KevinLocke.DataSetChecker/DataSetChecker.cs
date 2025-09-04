@@ -138,7 +138,7 @@ namespace KevinLocke.DataSetChecker
             int exitCode = 0;
             using (DataSetChecker checker = new(options.ConnectionString!))
             {
-                checker.DataSetCheckerEventHandler += (object sender, DataSetCheckerEventArgs eventArgs) =>
+                checker.DataSetCheckerEventHandler += (sender, eventArgs) =>
                 {
                     if (eventArgs.Severity == XmlSeverityType.Error || !options.NoWarnings)
                     {
