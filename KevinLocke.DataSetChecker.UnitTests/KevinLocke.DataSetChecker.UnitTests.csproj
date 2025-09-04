@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Unit tests for KevinLocke.DataSetChecker.</Description>
 
-    <TargetFrameworks>net4.7</TargetFrameworks>
+    <TargetFramework>net4.7</TargetFramework>
 
     <!--
       Disable check for EOL Target Framework (NETSDK1138).
